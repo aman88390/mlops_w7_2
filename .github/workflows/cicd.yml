@@ -48,4 +48,4 @@ jobs:
 
       - name: Stress Test (2000 concurrent)
         run: wrk -t12 -c2000 -d30s http://$EXTERNAL_IP/predict
-EOF
+
