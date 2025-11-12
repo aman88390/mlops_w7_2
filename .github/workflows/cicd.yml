@@ -1,4 +1,3 @@
-cat <<'EOF' > .github/workflows/cicd.yml
 name: CI/CD Iris Classifier (GCP)
 
 on:
@@ -20,7 +19,7 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
-     - name: Build Docker image
+      - name: Build Docker image
         run: docker build -t us-central1-docker.pkg.dev/sincere-mission-473205-i3/iris-repo/iris-classifier:latest 
 
 
