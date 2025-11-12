@@ -1,3 +1,4 @@
+cat <<'EOF' > .github/workflows/cicd.yml
 name: CI/CD Iris Classifier (GCP)
 
 on:
@@ -20,13 +21,13 @@ jobs:
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
       - name: Build Docker image
-        run: docker build -t us-central1-docker.pkg.dev/YOUR_GCP_PROJECT_ID/iris-repo/iris-classifier:latest .
+        run: docker build -t us-central1-docker.pkg.dev/sincere-mission-473205-i3/iris-repo/iris-classifier:latest .
 
       - name: Push Docker image
-        run: docker push us-central1-docker.pkg.dev/YOUR_GCP_PROJECT_ID/iris-repo/iris-classifier:latest
+        run: docker push us-central1-docker.pkg.dev/sincere-mission-473205-i3/iris-repo/iris-classifier:latest
 
       - name: Get GKE credentials
-        run: gcloud container clusters get-credentials iris-cluster --zone us-central1-a --project YOUR_GCP_PROJECT_ID
+        run: gcloud container clusters get-credentials iris-cluster --zone us-central1-a --project sincere-mission-473205-i3
 
       - name: Deploy to GKE
         run: |
@@ -35,11 +36,16 @@ jobs:
           kubectl apply -f k8s/hpa.yaml
           kubectl rollout status deployment/iris-classifier
 
+      - name: Get External IP
+        id: get_ip
+        run: echo "EXTERNAL_IP=$(kubectl get svc iris-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+
       - name: Install wrk
         run: sudo apt-get update && sudo apt-get install -y wrk
 
       - name: Stress Test (1000 concurrent)
-        run: wrk -t12 -c1000 -d30s http://<EXTERNAL-IP>/predict
+        run: wrk -t12 -c1000 -d30s http://$EXTERNAL_IP/predict
 
       - name: Stress Test (2000 concurrent)
-        run: wrk -t12 -c2000 -d30s http://<EXTERNAL-IP>/predict
+        run: wrk -t12 -c2000 -d30s http://$EXTERNAL_IP/predict
+EOF
