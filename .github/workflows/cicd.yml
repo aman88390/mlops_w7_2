@@ -28,13 +28,21 @@ jobs:
       - name: Get GKE credentials
         run: gcloud container clusters get-credentials iris-cluster --zone us-central1-a --project sincere-mission-473205-i3
 
+       # 🧩 Install the GKE Auth Plugin (required for kubectl on GCP)
+      - name: Install GKE Auth Plugin
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
       - name: Deploy to GKE
         run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/hpa.yaml
           kubectl rollout status deployment/iris-classifier
-
+        
       - name: Get External IP
         id: get_ip
         run: echo "EXTERNAL_IP=$(kubectl get svc iris-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
