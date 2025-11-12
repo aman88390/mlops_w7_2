@@ -21,17 +21,15 @@ jobs:
       - name: Build Docker image
         run: docker build -t us-central1-docker.pkg.dev/sincere-mission-473205-i3/iris-repo/iris-classifier:latest .
 
-
       - name: Get GKE credentials
         run: gcloud container clusters get-credentials iris-cluster --zone us-central1-a --project sincere-mission-473205-i3
       
       - name: Install GKE Auth Plugin
         run: |
           echo "Adding Google Cloud SDK repository..."
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-          sudo apt-get install -y apt-transport-https ca-certificates gnupg
-          sudo mkdir -p /usr/share/keyrings
-          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
+          sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
           sudo apt-get update -y
           sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
@@ -43,8 +41,8 @@ jobs:
           kubectl apply -f k8s/service.yaml --validate=false
           kubectl apply -f k8s/hpa.yaml --validate=false
           kubectl rollout status deployment/iris-classifier
-
-        
+      
+              
       - name: Get External IP
         id: get_ip
         run: echo "EXTERNAL_IP=$(kubectl get svc iris-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
