@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: iris-classifier
-        image: us-central1-docker.pkg.dev/YOUR_GCP_PROJECT_ID/iris-repo/iris-classifier:latest
+        image: us-central1-docker.pkg.dev/sincere-mission-473205-i3/iris-repo/iris-classifier:latest
+
         ports:
         - containerPort: 8080
         resources:
